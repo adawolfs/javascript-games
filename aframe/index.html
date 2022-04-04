@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script
+        src="https://unpkg.com/aframe-environment-component@1.2.0/dist/aframe-environment-component.min.js"></script>
+    <script src="https://supermedium.github.io/aframe-super-shooter-kit/dist/aframe-super-shooter-kit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="a-components.js"></script>
+    <script>
+        /**
+         * Click mouse to shoot.
+         */
+        AFRAME.registerComponent('click-to-shoot', {
+            init: function () {
+                document.body.addEventListener('mousedown', () => { this.el.emit('shoot'); });
+            }
+        });
+
+        /**
+         * Change color when hit.
+         */
+        AFRAME.registerComponent('hit-handler', {
+            dependencies: ['material'],
+
+            init: function () {
+                var color;
+                var el = this.el;
+                console.log("init handler")
+                console.log(this.el)
+                color = new THREE.Color();
+                el.addEventListener('hit', () => {
+                    color.addScalar(0.05);
+                    console.log("hit")
+                    el.components.material.material.color.copy(color);
+                });
+
+                el.addEventListener('die', () => {
+                    color.setRGB(1, 0, 0);
+                    console.log("die")
+                    el.object3D.visible = false;
+                });
+            },
+
+            tick: function () {
+                let el = this.el;
+                let position = el.getAttribute('position');
+                position.z = position.z + 0.008;
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <a-scene  debug guategeeks environment="preset: threetowers">
+        <a-assets>
+            <a-asset-item id="zombie-mutant" src="models/minecraft-mutant/source/Zombie_mutant_geo.gltf"></a-asset-item>
+            <a-asset-item id="zombie-minecraft" src="models/zombie/scene.gltf"></a-asset-item>
+        </a-assets>
+        <a-box class="target" target="healthPoints: 10" position="0 1 -10" depth="0.5" height="4" width="0.5" material="opacity: 0" hit-handler >
+            <a-entity gltf-model="#zombie-minecraft"  animation-mixer="clip: z_armature|walk"
+                rotation="0 0 0" position="0 -1 0"></a-entity>
+        </a-box>
+        <a-entity id="bulletTemplate" bullet="name: normal; speed: 100.0; poolSize: 20"
+            geometry="primitive: sphere; radius: 0.1" material="color: orange"></a-entity>
+        <a-camera id="camera" wasd-controls="enabled:false" shooter>
+            <a-cylinder id="cylinder" position="0 -0.5 0" rotation="90 0 0" radius="0.2" height="2" color="red" shooter
+                click-to-shoot></a-cylinder>
+        </a-camera>
+    </a-scene>
+</body>
+
+</html>
