@@ -1,0 +1,16 @@
+body {
+    font-size: 100px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+#buttons {
+    display: flex;
+    justify-content: center;
+    
+}
+button {
+    width: 100%;
+    border-radius: 20px;
+    margin: 0 10px;
+    font-size: 100px;
+}
