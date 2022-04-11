@@ -74,7 +74,7 @@
 </head>
 
 <body>
-    <a-scene debug guategeeks environment="preset: threetowers">
+    <a-scene debug guategeeks environment="preset: forest">
         <a-assets>
             <a-asset-item id="zombie-mutant" src="models/minecraft-mutant/source/Zombie_mutant_geo.gltf"></a-asset-item>
             <a-asset-item id="zombie-minecraft" src="models/zombie/scene.gltf"></a-asset-item>
@@ -114,9 +114,9 @@
 
         <a-entity light="color: #FFF; intensity: 1.5; type: point" position="-1 1 0"></a-entity>
 
-        <a-entity id="bulletTemplate" bullet="name: normal; damagePoints: 1.0; speed: 50.0; poolSize: 20"
+        <a-entity id="bulletTemplate" bullet="name: normal; damagePoints: 1.0; speed: 25da.0; poolSize: 20"
             geometry="primitive: sphere; radius: 0.5" material="color: orange"></a-entity>
-        <a-camera id="camera" wasd-controls="enabled:false" shooter>
+        <a-camera id="camera" look-controls="pointerLockEnabled:true" wasd-controls="enabled:true" shooter>
             <a-entity class="player" gltf-model="#player" animation-mixer="clip: Fusil_IDLE" position="0 -1.5 0"
                 rotation="0 180 0" click-to-shoot></a-entity>
         </a-camera>
