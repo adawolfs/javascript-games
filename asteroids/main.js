@@ -21,6 +21,7 @@ const config = {
 // Create variables
 var bullets;
 var asteroids;
+var scorePoints;
 var ship;
 var speed;
 var stats;
@@ -29,10 +30,12 @@ var isDown = false;
 var mouseX = 0;
 var mouseY = 0;
 var points = 0;
+var gameOver = false;
 
 function updatePoints() {
-    let ponts = document.getElementById('points');
-    ponts.innerHTML = `Puntuacion: ${points}`;
+    if (scorePoints){
+        scorePoints.text = (`Points: ${points}`);
+    }
 }
 
 
@@ -45,7 +48,7 @@ var game = new Phaser.Game(config);
 function preload() {
     this.load.image('ship', 'assets/ship.png');
     this.load.image('bullet1', 'assets/bullet2.png');
-    this.load.image('asteroid', 'assets/asteroidx.png');
+    this.load.spritesheet('asteroid', 'assets/asteroid.png', { frameWidth: 128, frameHeight: 128 });
     // this.load.spritesheet('asteroid', 'asteroid.png', 1024, 1024, 64);
 }
 
@@ -105,19 +108,19 @@ function create() {
 
     var Asteroid = new Phaser.Class({
 
-        Extends: Phaser.GameObjects.Image,
+        Extends: Phaser.GameObjects.Sprite,
 
         initialize:
 
             function Asteroid(scene) {
-                Phaser.GameObjects.Image.call(this, scene, 0, 0, 'asteroid');
+                Phaser.GameObjects.Sprite.call(this, scene, 0, 0, 'asteroid');
                 // Required to enable physics on the object
                 this.scene.physics.world.enableBody(this, 0);
                 // Set object inclination
                 this.incX = 0;
                 this.incY = 0;
                 this.lifespan = 0;
-
+                // Set object speed
                 this.speed = Phaser.Math.GetSpeed(200, 1);
             },
         spawn: function () {
@@ -159,6 +162,13 @@ function create() {
             var angle = Phaser.Math.Angle.Between(this.x, this.y, 400, 300);
             this.incX = Math.cos(angle);
             this.incY = Math.sin(angle);
+            
+            const asteroidAnimation = this.anims.create({
+                key: 'l1',
+                frames: this.anims.generateFrameNumbers('asteroid').slice(0, 32),
+                frameRate: 16,
+            });
+            this.play({ key: 'l1', repeat: 7 });
 
         },
         update: function (time, delta) {
@@ -200,7 +210,9 @@ function create() {
         runChildUpdate: true
     });
 
-
+    scorePoints = this.add.text(48, 440, 'Points: 0', { color: '#00ff00' });
+    gameOverText = this.add.text(300, 300, 'GAME OVER', { color: '#00ff00',aligh: 'center', fontSize: '64px' });
+    gameOverText.setVisible(false)
     // Setup physics collision
     this.physics.add.collider(bullets, asteroids, (bullet, asteroid) => {
         // Destroy bullet and asteroid
@@ -212,12 +224,22 @@ function create() {
         }
     });
 
-
     // Create the ship
     ship = this.add.sprite(400, 300, 'ship').setDepth(1);
     ship.setScale(0.2)
 
-
+    // Setup physics collision
+    this.physics.world.enableBody(ship, 0);
+    this.physics.add.collider(asteroids, ship, (asteroid, ship) => {
+        console.log("Collision");
+        // Destroy bullet and asteroid
+        if (ship) {
+            ship.destroy();
+            gameOver = true;
+            gameOverText.setVisible(true);
+        }
+    });
+        
     // Detect mouse movement
     this.input.on('pointermove', function (pointer) {
         mouseX = pointer.x;
@@ -242,7 +264,7 @@ function create() {
 function update(time, delta) {
 
     // If mouse is down and the last fire was more than 50ms ago
-    if (isDown && time > lastFired) {
+    if (isDown && time > lastFired && !gameOver) {
         // Create a bullet
         const bullet = bullets.get();
         // Check if the instance is not null
